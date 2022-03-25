@@ -24,6 +24,21 @@
     <title>Cookbook</title>
   </head>
   <body>
+    <div class="overlay hide"></div>
+    <div class="modal">
+      <p class="nav__tagline">Please Enter You Name</p>
+      <form class="modal__form">
+        <input
+          type="text"
+          placeholder="John Doe"
+          id="modal__input"
+          class="modal__input"
+          required
+        />
+        <button type="submit" class="modal__btn">Enter</button>
+      </form>
+    </div>
+
     <nav class="nav">
       <div class="container">
         <h1 class="nav__brand">Cookbook</h1>
@@ -59,11 +74,15 @@
     <!-- Main Content -->
     <main class="main">
       <div class="container">
+        <div class="loader__cont">
+          <img src="./img/loader.gif" alt="" class="loader" />
+        </div>
         <div class="favourites__wrapper">
           <p class="nav__tagline">My favourites</p>
           <div class="favourites"></div>
         </div>
         <p class="search__res search"></p>
+
         <div class="meals"></div>
       </div>
       <div class="recipe"></div>

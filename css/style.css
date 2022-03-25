@@ -282,6 +282,90 @@ img {
   justify-content: center;
 }
 
+.loader,
+.loader1 {
+  max-width: 100px;
+}
+
+.overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.modal {
+  padding: 1em 1.25em;
+  background-color: #fff;
+  border: 1px solid #f4f4f4;
+  border-radius: 0.5em;
+  width: 20em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -80%);
+  transition: all 500ms ease;
+}
+
+.modal.show {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%);
+}
+
+.modal .nav__tagline {
+  font-size: 1.125rem;
+}
+
+.modal__input {
+  background: transparent;
+  border: none;
+  display: inline-block;
+  margin: 1em 0;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  color: #a6a6a6;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--clr-accent);
+}
+
+.modal__input::placeholder {
+  color: #a6a6a6;
+}
+
+.modal__btn {
+  background: var(--clr-accent);
+  border: none;
+  padding: 0.4em 1.5em;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--clr-dark);
+  transition: transform 300ms;
+  margin-top: 0.25em;
+  position: relative;
+  right: -70%;
+}
+
+.modal__btn:focus {
+  outline: none;
+  transform: scale(0.92);
+}
+
+.hide {
+  display: none;
+}
+
+.loader__cont {
+  display: grid;
+  place-items: center;
+  padding: 2em 0;
+}
+
 @media only screen and (min-width: 786px) {
   .recipe__info__text {
     padding: 0.5em 10em;

@@ -11,10 +11,17 @@ const recipeContainer = document.querySelector(".recipe");
 const backHomeBtn = document.querySelector(".back__home");
 const main = document.querySelector("main");
 const favourites = document.querySelector(".favourites");
+const favouritesWrapper = document.querySelector(".favourites__wrapper");
 const searchRes = document.querySelector(".search__res");
+const modal = document.querySelector(".modal");
+const overlay = document.querySelector(".overlay");
+const modalForm = document.querySelector(".modal__form");
+const modalInput = document.querySelector(".modal__input");
+const modalSubmit = document.querySelector(".modal__submit");
+const loader = document.querySelector(".loader__cont");
 
 // Variables and Constants
-let userName = "Yawar";
+const getUserName = function () {};
 
 // ============================================================================ //
 // functions
@@ -22,6 +29,12 @@ let userName = "Yawar";
 
 // Generates the meal information
 const mealInfoGen = function (meal) {
+  header.style.display = "none";
+  favouritesWrapper.style.display = "none";
+  favourites.style.display = "none";
+  recipeContainer.style.display = "none";
+  loader.style.display = "grid";
+
   let ingredients = "";
   let measurements = "";
   let i = 1;
@@ -67,6 +80,7 @@ const mealInfoGen = function (meal) {
       </div>
       <div class="recipe__info__text">
       <button class="back__home"><i class="fas fa-regular fa-caret-left"></i> Go Back</button>
+      
         <h2 class="main__recipe__name">
         ${meal.strMeal}
         </h2>
@@ -86,6 +100,11 @@ const mealInfoGen = function (meal) {
       </div>
     </div>
   `;
+
+  setTimeout(() => {
+    loader.style.display = "none";
+    recipeContainer.style.display = "block";
+  }, 2000);
 
   recipeContainer.innerHTML = recipeInformation;
 };
@@ -232,12 +251,29 @@ const loadFavs = function () {
 
 // Fetch a random meal and get a user name
 const domContentEvent = function () {
-  //   userName = prompt("What's your name, friend ?");
-  greeting.textContent = `Hi, ${userName}`;
+  let userName;
+  if (localStorage.getItem("userName") === null) {
+    overlay.classList.remove("hide");
+    modal.classList.add("show");
+    document.body.style.overflowY = "hidden";
+  } else {
+    userName = localStorage.getItem("userName");
+    greeting.textContent = `Hi, ${localStorage.getItem("userName")}`;
+  }
 
   loadFavs();
 
   const url = "https://www.themealdb.com/api/json/v1/1/random.php";
+
+  meals.style.display = "none";
+  favouritesWrapper.style.display = "none";
+  favourites.style.display = "none";
+  setTimeout(() => {
+    loader.style.display = "none";
+    meals.style.display = "flex";
+    favourites.style.display = "flex";
+    favouritesWrapper.style.display = "block";
+  }, 2500);
 
   for (let i = 0; i <= 11; i++) {
     randomMeal();
@@ -247,7 +283,6 @@ const domContentEvent = function () {
 // Search meal and error
 const searchMeal = function (e) {
   e.preventDefault();
-
   const queryMeal = recipeName.value;
   recipeName.value = "";
 
@@ -275,7 +310,8 @@ const backMeal = function (e) {
   if (e.target.classList.contains("back__home")) {
     meals.style.display = "flex";
     header.style.display = "block";
-
+    favouritesWrapper.style.display = "block";
+    favourites.style.display = "flex";
     recipeContainer.innerHTML = "";
   }
 };
@@ -354,12 +390,33 @@ const favInfo = function (e) {
 // Eventlisteners
 // ============================================================================ //
 
+//  Modal
+modalForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  let userName = "";
+  if (localStorage.getItem("userName") == undefined) {
+    userName = "";
+  } else {
+    userName = localStorage.getItem("userName");
+  }
+  userName = modalInput.value;
+  modalInput.value = "";
+  localStorage.setItem("userName", userName);
+
+  greeting.textContent = `Hi, ${localStorage.getItem("userName")}`;
+
+  overlay.classList.add("hide");
+  modal.classList.add("hide");
+  document.body.style.overflowY = "scroll";
+});
+
 // Get user name and fetch a random meal
 document.addEventListener("DOMContentLoaded", domContentEvent);
 
 // search meal
 recipeForm.addEventListener("submit", searchMeal);
 
+// Event listeners on dynamic dom elements
 container.addEventListener("click", (e) => {
   // lookup meal
   lookupMeal(e);
