@@ -10,11 +10,17 @@ const header = document.querySelector(".header");
 const recipeContainer = document.querySelector(".recipe");
 const backHomeBtn = document.querySelector(".back__home");
 const main = document.querySelector("main");
+const favourites = document.querySelector(".favourites");
+const searchRes = document.querySelector(".search__res");
 
 // Variables and Constants
 let userName = "Yawar";
 
+// ============================================================================ //
 // functions
+// ============================================================================ //
+
+// Generates the meal information
 const mealInfoGen = function (meal) {
   let ingredients = "";
   let measurements = "";
@@ -84,6 +90,7 @@ const mealInfoGen = function (meal) {
   recipeContainer.innerHTML = recipeInformation;
 };
 
+// Generates the meal element into the DOM
 const mealElGenMod = function (meal) {
   meal.forEach((ml) => {
     // meal tag
@@ -126,13 +133,14 @@ const mealElGenMod = function (meal) {
 
     // favourite icon tag
     const iconEl = document.createElement("i");
-    iconEl.className = "fa-regular fa-heart";
+    iconEl.className = "fa-solid fa-heart";
     favouriteEl.appendChild(iconEl);
 
     meals.appendChild(mealEl);
   });
 };
 
+// Fetches a random meal from the API
 const randomMeal = function () {
   const url = "https://www.themealdb.com/api/json/v1/1/random.php";
   fetch(url)
@@ -144,22 +152,75 @@ const randomMeal = function () {
     .catch((err) => console.log(err));
 };
 
-// Eventlisteners
+// Add meal to LS
+const addMealToLS = function (meal) {
+  let mealNames;
+  if (localStorage.getItem("mealNames") === null) {
+    mealNames = [];
+  } else {
+    mealNames = JSON.parse(localStorage.getItem("mealNames"));
+  }
 
-// Get user name and fetch a random meal
-document.addEventListener("DOMContentLoaded", () => {
+  mealNames.push(meal);
+  localStorage.setItem("mealNames", JSON.stringify(mealNames));
+};
+
+// Create and load fav recipe to the DOM
+const loadFavsToDOM = function (favMeal) {
+  const fav = document.createElement("div");
+  fav.className = "fav";
+  const img = document.createElement("img");
+  img.setAttribute("data-id", `${favMeal.idMeal}`);
+  img.className = "fav__img";
+
+  img.src = `${favMeal.strMealThumb}`;
+  fav.appendChild(img);
+  favourites.appendChild(fav);
+};
+
+// Fetch the fav recipes from localstorage and api
+const loadFavs = function () {
+  let mealNames;
+  if (localStorage.getItem("mealNames") === null) {
+    mealNames = [];
+  } else {
+    mealNames = JSON.parse(localStorage.getItem("mealNames"));
+  }
+
+  favourites.innerHTML = ``;
+  mealNames.forEach((name) => {
+    const url = `https://www.themealdb.com/api/json/v1/1/search.php?s=${name}`;
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        const mealInfo = data.meals[0];
+        loadFavsToDOM(mealInfo);
+      })
+      .catch((err) => console.log(err));
+  });
+};
+
+// ============================================================================ //
+//  FUNCTIONS FOR EVENTLISTENERS
+// ============================================================================ //
+
+// Fetch a random meal and get a user name
+const domContentEvent = function () {
   //   userName = prompt("What's your name, friend ?");
   greeting.textContent = `Hi, ${userName}`;
 
+  loadFavs();
+
   const url = "https://www.themealdb.com/api/json/v1/1/random.php";
 
-  for (let i = 0; i <= 10; i++) {
+  for (let i = 0; i <= 11; i++) {
     randomMeal();
   }
-});
+};
 
-// search meal
-recipeForm.addEventListener("submit", (e) => {
+// Search meal and error
+const searchMeal = function (e) {
   e.preventDefault();
 
   const queryMeal = recipeName.value;
@@ -175,15 +236,27 @@ recipeForm.addEventListener("submit", (e) => {
         }, 2000);
       } else {
         const meal = data.meals;
-        meals.innerHTML = "<h4 class='search'>Search Results</h4>";
+        // meals.innerHTML = "<h4 class='search'>Search Results</h4>";
+        searchRes.innerHTML = ``;
+        searchRes.textContent = "Search results";
+        meals.innerHTML = ``;
         mealElGenMod(meal);
-        // console.log(meal);
       }
     })
     .catch((err) => console.log(err));
-});
+};
 
-container.addEventListener("click", (e) => {
+// Back from meal to home
+const backMeal = function (e) {
+  if (e.target.classList.contains("back__home")) {
+    meals.style.display = "flex";
+    header.style.display = "block";
+
+    recipeContainer.innerHTML = "";
+  }
+};
+
+const lookupMeal = function (e) {
   let checkClasses = [
     "meal",
     "meal__img",
@@ -193,6 +266,7 @@ container.addEventListener("click", (e) => {
   ];
 
   if (checkClasses.includes(e.target.className)) {
+    // open meal info
     const mealId = e.target.dataset;
     meals.style.display = "none";
     header.style.display = "none";
@@ -208,13 +282,67 @@ container.addEventListener("click", (e) => {
       })
       .catch((err) => console.log(err));
   }
-});
+};
 
-recipeContainer.addEventListener("click", (e) => {
-  if (e.target.classList.contains("back__home")) {
-    meals.style.display = "block";
-    header.style.display = "block";
+const favAddRemove = function (e) {
+  // add to favs and localstorage
+  let btnClasses = ["fa-solid fa-heart"];
 
-    recipeContainer.innerHTML = "";
+  if (btnClasses.includes(e.target.className)) {
+    e.target.classList.add("favourited");
+
+    const name = e.target.parentNode.parentNode.firstChild.textContent;
+
+    addMealToLS(name);
+    loadFavs();
+  } else if (e.target.classList.contains("favourited")) {
+    //remove from local storage
+    e.target.classList.remove("favourited");
   }
+};
+
+const favInfo = function (e) {
+  // fav info
+  if (
+    e.target.classList.contains("fav") ||
+    e.target.classList.contains("fav__img")
+  ) {
+    console.log(e.target.dataset.id);
+    fetch(
+      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${e.target.dataset.id}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const meal = data.meals[0];
+        console.log(meal);
+        // recipeContainer.innerHTML = ``;
+        meals.style.display = "none";
+        mealInfoGen(meal);
+      })
+      .catch((err) => console.log(err));
+  }
+};
+
+// ============================================================================ //
+// Eventlisteners
+// ============================================================================ //
+
+// Get user name and fetch a random meal
+document.addEventListener("DOMContentLoaded", domContentEvent);
+
+// search meal
+recipeForm.addEventListener("submit", searchMeal);
+
+container.addEventListener("click", (e) => {
+  // lookup meal
+  lookupMeal(e);
+
+  // Add Remove Fav
+  favAddRemove(e);
+
+  // Fav info
+  favInfo(e);
 });
+
+// Back button working
+recipeContainer.addEventListener("click", backMeal);
