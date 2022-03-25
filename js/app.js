@@ -19,9 +19,8 @@ const modalForm = document.querySelector(".modal__form");
 const modalInput = document.querySelector(".modal__input");
 const modalSubmit = document.querySelector(".modal__submit");
 const loader = document.querySelector(".loader__cont");
-
+// const popular = document.querySelector(".popular");
 // Variables and Constants
-const getUserName = function () {};
 
 // ============================================================================ //
 // functions
@@ -33,6 +32,8 @@ const mealInfoGen = function (meal) {
   favouritesWrapper.style.display = "none";
   favourites.style.display = "none";
   recipeContainer.style.display = "none";
+  // popular.style.display = "none";
+  searchRes.textContent = "";
   loader.style.display = "grid";
 
   let ingredients = "";
@@ -213,11 +214,20 @@ const removeMealFromLS = function (meal) {
 const loadFavsToDOM = function (favMeal) {
   const fav = document.createElement("div");
   fav.className = "fav";
+  fav.setAttribute("data-name", `${favMeal.strMeal}`);
   const img = document.createElement("img");
   img.setAttribute("data-id", `${favMeal.idMeal}`);
   img.className = "fav__img";
-
   img.src = `${favMeal.strMealThumb}`;
+
+  const remove = document.createElement("div");
+  remove.className = "remove";
+
+  const minus = document.createElement("div");
+  minus.className = "minus";
+
+  remove.appendChild(minus);
+  fav.appendChild(remove);
   fav.appendChild(img);
   favourites.appendChild(fav);
 };
@@ -268,11 +278,14 @@ const domContentEvent = function () {
   meals.style.display = "none";
   favouritesWrapper.style.display = "none";
   favourites.style.display = "none";
+  searchRes.textContent = "";
   setTimeout(() => {
     loader.style.display = "none";
     meals.style.display = "flex";
     favourites.style.display = "flex";
     favouritesWrapper.style.display = "block";
+    // popular.style.display = "block";
+    searchRes.textContent = "Popular Recipes";
   }, 2500);
 
   for (let i = 0; i <= 11; i++) {
@@ -285,7 +298,10 @@ const searchMeal = function (e) {
   e.preventDefault();
   const queryMeal = recipeName.value;
   recipeName.value = "";
-
+  document.body.classList.toggle("check");
+  document.body.focus();
+  meals.style.display = "none";
+  loader.style.display = "grid";
   fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${queryMeal}`)
     .then((res) => res.json())
     .then((data) => {
@@ -298,11 +314,16 @@ const searchMeal = function (e) {
         const meal = data.meals;
         searchRes.innerHTML = ``;
         searchRes.textContent = "Search results";
+        // popular.textContent = "";
         meals.innerHTML = ``;
         mealElGenMod(meal);
       }
     })
     .catch((err) => console.log(err));
+  setTimeout(() => {
+    loader.style.display = "none";
+    meals.style.display = "flex";
+  }, 1000);
 };
 
 // Back from meal to home
@@ -313,9 +334,14 @@ const backMeal = function (e) {
     favouritesWrapper.style.display = "block";
     favourites.style.display = "flex";
     recipeContainer.innerHTML = "";
+    document.body.classList.contains("check")
+      ? (searchRes.textContent = "Search Results")
+      : (searchRes.textContent = "Popular Recipes");
+    window.scrollTo(0, 0);
   }
 };
 
+// Lookup Meal
 const lookupMeal = function (e) {
   let checkClasses = [
     "meal",
@@ -337,15 +363,15 @@ const lookupMeal = function (e) {
       .then((res) => res.json())
       .then((data) => {
         const mealInfo = data.meals[0];
-
+        // popular.style.display = "none";
         mealInfoGen(mealInfo);
       })
       .catch((err) => console.log(err));
   }
 };
 
+// add to favs and localstorage
 const favAddRemove = function (e) {
-  // add to favs and localstorage
   let btnClasses = ["fa-solid fa-heart"];
 
   if (btnClasses.includes(e.target.className)) {
@@ -361,25 +387,28 @@ const favAddRemove = function (e) {
     e.target.classList.remove("favourited");
     removeMealFromLS(name);
     loadFavs();
+  } else if (e.target.classList.contains("remove")) {
+    const name = e.target.parentNode.dataset.name;
+    removeMealFromLS(name);
+    loadFavs();
   }
 };
 
+// fav info
 const favInfo = function (e) {
-  // fav info
   if (
     e.target.classList.contains("fav") ||
     e.target.classList.contains("fav__img")
   ) {
-    console.log(e.target.dataset.id);
     fetch(
       `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${e.target.dataset.id}`
     )
       .then((res) => res.json())
       .then((data) => {
         const meal = data.meals[0];
-        console.log(meal);
         // recipeContainer.innerHTML = ``;
         meals.style.display = "none";
+        // popular.style.display = "none";
         mealInfoGen(meal);
       })
       .catch((err) => console.log(err));

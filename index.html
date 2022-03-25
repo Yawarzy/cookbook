@@ -41,7 +41,9 @@
 
     <nav class="nav">
       <div class="container">
-        <h1 class="nav__brand">Cookbook</h1>
+        <h1 class="nav__brand">
+          <a href="index.html" class="nav__brand">Cookbook</a>
+        </h1>
         <p class="nav__tagline">All your favourite recipes at one place</p>
       </div>
     </nav>
@@ -74,15 +76,14 @@
     <!-- Main Content -->
     <main class="main">
       <div class="container">
-        <div class="loader__cont">
-          <img src="./img/loader.gif" alt="" class="loader" />
-        </div>
         <div class="favourites__wrapper">
           <p class="nav__tagline">My favourites</p>
           <div class="favourites"></div>
         </div>
-        <p class="search__res search"></p>
-
+        <p class="search__res search">Popular Recipes</p>
+        <div class="loader__cont">
+          <img src="./img/loader.gif" alt="" class="loader" />
+        </div>
         <div class="meals"></div>
       </div>
       <div class="recipe"></div>
