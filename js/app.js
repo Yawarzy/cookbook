@@ -134,6 +134,16 @@ const mealElGenMod = function (meal) {
     // favourite icon tag
     const iconEl = document.createElement("i");
     iconEl.className = "fa-solid fa-heart";
+
+    let mealNames;
+    if (localStorage.getItem("mealNames") === null) {
+      mealNames = [];
+    } else {
+      mealNames = JSON.parse(localStorage.getItem("mealNames"));
+      if (mealNames.includes(`${ml.strMeal}`))
+        iconEl.classList.add("favourited");
+    }
+
     favouriteEl.appendChild(iconEl);
 
     meals.appendChild(mealEl);
@@ -163,6 +173,21 @@ const addMealToLS = function (meal) {
 
   mealNames.push(meal);
   localStorage.setItem("mealNames", JSON.stringify(mealNames));
+};
+
+// Remove from LS
+const removeMealFromLS = function (meal) {
+  let mealNames;
+  if (localStorage.getItem("mealNames") === null) {
+    mealNames = [];
+  } else {
+    mealNames = JSON.parse(localStorage.getItem("mealNames"));
+  }
+
+  mealNames = mealNames.filter((mealName) => mealName !== meal);
+
+  localStorage.setItem("mealNames", JSON.stringify(mealNames));
+  console.log(mealNames);
 };
 
 // Create and load fav recipe to the DOM
@@ -236,7 +261,6 @@ const searchMeal = function (e) {
         }, 2000);
       } else {
         const meal = data.meals;
-        // meals.innerHTML = "<h4 class='search'>Search Results</h4>";
         searchRes.innerHTML = ``;
         searchRes.textContent = "Search results";
         meals.innerHTML = ``;
@@ -290,14 +314,17 @@ const favAddRemove = function (e) {
 
   if (btnClasses.includes(e.target.className)) {
     e.target.classList.add("favourited");
-
     const name = e.target.parentNode.parentNode.firstChild.textContent;
 
     addMealToLS(name);
     loadFavs();
   } else if (e.target.classList.contains("favourited")) {
     //remove from local storage
+
+    const name = e.target.parentNode.parentNode.firstChild.textContent;
     e.target.classList.remove("favourited");
+    removeMealFromLS(name);
+    loadFavs();
   }
 };
 
